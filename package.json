@@ -22,14 +22,14 @@
         "@js-joda/core": "^1.12.0",
         "@js-joda/locale_en-us": "^3.1.1",
         "@js-joda/timezone": "^2.2.0",
-        "@tailwindcss/ui": "^0.3.0",
+        "@tailwindcss/ui": "^0.5.0",
         "cssnano": "^4.1.10",
         "npm-run-all": "^4.1.5",
         "postcss": "^7.0.32",
         "postcss-cli": "^7.1.1",
         "react": "16.13.0",
         "react-dom": "16.13.0",
-        "tailwindcss": "^1.4.6",
+        "tailwindcss": "^1.6.2",
         "xregexp": "^4.3.0"
     }
 }
