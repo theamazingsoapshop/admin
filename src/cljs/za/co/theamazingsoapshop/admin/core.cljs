@@ -11,7 +11,9 @@
             [cljs-http.client :as http]
             [cljs.core.async :as csp]
             md5.core
-            [integrant.core :as ig]))
+            [integrant.core :as ig]
+            [za.co.theamazingsoapshop.admin.ui.test :as -uitest]
+            ))
 
 (glogi-console/install!)
 
@@ -27,4 +29,7 @@
   (render widget (js/document.getElementById "app")))
 
 (defn ^:export run []
-  (main-widget [:div [:p "Hello andrea"]]))
+  (main-widget [-uitest/ui]))
+
+(defn ^:dev/after-load restart []
+  (run))
