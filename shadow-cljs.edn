@@ -5,7 +5,7 @@
  {8000 ["target" "config" "img"]}
 
  :builds
- {:client {:target     :browser
-           :output-dir "target/cljs"
-           :asset-path "/cljs"
-           :modules    {:main {:entries [za.co.theamazingsoapshop.admin.core]}}}}}
+ {:ui {:target     :browser
+       :output-dir "target/cljs"
+       :asset-path "/cljs"
+       :modules    {:main {:entries [za.co.theamazingsoapshop.admin.core]}}}}}

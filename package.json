@@ -5,12 +5,14 @@
     "main": "index.js",
     "scripts": {
         "clean": "rm -rf target/*",
+        "copy:html": "cp src/html/*.html target/",
+        "copy": "npm-run-all --parallel copy:*",
         "build:css": "npx postcss src/css/styles.css -o target/css/tailwind.css",
-        "build:cljs": "npx shadow-cljs release client",
-        "build": "npm run clean && npm-run-all --parallel build:* ",
-        "watch:cljs": "npx shadow-cljs watch client",
+        "build:cljs": "npx shadow-cljs release ui",
+        "build": "npm run clean && npm run copy && npm-run-all --parallel build:* ",
+        "watch:cljs": "npx shadow-cljs watch ui",
         "watch:css": "npx postcss src/css/styles.css -w -o target/css/tailwind.css",
-        "watch": "npm run clean && npm-run-all --parallel watch:*"
+        "watch": "npm run clean && npm run copy && npm-run-all --parallel watch:*"
     },
     "keywords": [],
     "author": "Pieter Breed",
