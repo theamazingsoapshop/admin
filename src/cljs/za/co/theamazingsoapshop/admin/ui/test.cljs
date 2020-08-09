@@ -1,6 +1,6 @@
 (ns za.co.theamazingsoapshop.admin.ui.test
   (:require #_["/com/tailwindui/Transition" :as tw-transition :refer [Transition]]
-            ["/demo/bar" :refer [myComponent]]))
+            ["/demo/bar" :as bar :refer [myComponent]]))
 
 (defn ui []
   [:div.h-screen.flex.overflow-hidden.bg-gray-100
