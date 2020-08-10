@@ -6,7 +6,7 @@
     "scripts": {
         "clean": "rm -rf target/* src/gen/*",
         "copy:html": "cp src/html/*.html target/",
-        "copy": "mkdir target && npm-run-all --parallel copy:*",
+        "copy": "mkdir -p target && npm-run-all --parallel copy:*",
         "build:jsx": "npx babel src/jsx --out-dir src/gen",
         "build:css": "npx postcss src/css/styles.css -o target/css/tailwind.css",
         "build:cljs": "npx shadow-cljs release ui",

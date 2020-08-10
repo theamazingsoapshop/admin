@@ -62,3 +62,10 @@
        :stroke-linejoin "round",
        :stroke-linecap "round"}]]
 )
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti icon-for (fn [key classes] key))
+(defmethod icon-for :za.co.theamazingsoapshop.admin.ui.app/payments [_ classes] [credit-card classes])
+(defmethod icon-for :za.co.theamazingsoapshop.admin.ui.app/team [_ classes] [team classes])
+(defmethod icon-for :za.co.theamazingsoapshop.admin.ui.app/logout [_ classes] [logout classes])
