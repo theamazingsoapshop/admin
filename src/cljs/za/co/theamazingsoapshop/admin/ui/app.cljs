@@ -1,7 +1,7 @@
 (ns za.co.theamazingsoapshop.admin.ui.app
-  (:require #_["/com/tailwindui/Transition" :as tw-transition :refer [Transition]]
-            #_["/demo/bar" :as bar :refer [myComponent]]
-            [za.co.theamazingsoapshop.admin.ui.svg :as -svg]
+  (:require [za.co.theamazingsoapshop.admin.ui.svg :as -svg]
+            [za.co.theamazingsoapshop.admin.ui.common :as -ui-common]
+            [za.co.theamazingsoapshop.admin.ui.payments :as -payments]
             [reagent.core :as r]
             [clojure.string :as str]
             [integrant.core :as ig]
@@ -90,7 +90,7 @@
 (defn make-menu-items
   [selected-key set-select-key-fn]
   (log/debug ::making-menu-items selected-key)
-  (log/spy (->> [{:key ::payments}
+  (log/spy (->> [{:key ::-payments/payments}
                  {:key ::team}
                  {:key ::logout
                   :text "Instant logout"}]
@@ -104,7 +104,7 @@
   (let [state (::state system)
         user-profile {:person/firstname "Pieter"
                       :person/lastname "Breed"
-                      :person/email "pieter@pb.co.za"}]
+                      :person/email "andrea.nyirenda@gmail.com"}]
 
     (log/debug ::system system)
     (fn []
@@ -189,6 +189,7 @@
             {:aria-label "Open sidebar"
              :on-click #(swap! state assoc :small-screen-menu-hidden false)}
             [-svg/open-sidebar "h-6 w-6"]]]
+
           [:main.flex-1.relative.z-0.overflow-y-auto.focus:outline-none
            {:tabIndex "0"}
            (when (or selected-menu-item)
@@ -197,11 +198,8 @@
               [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
                [:h1.text-2xl.font-semibold.text-gray-900 (:text selected-menu-item)]]
               [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
-               ;;"<!-- Replace with your content -->"
                [:div.py-4
-                [:div.border-4.border-dashed.border-gray-200.rounded-lg.h-96]]
-               ;;"<!-- /End replace -->"
-               ]])]]]))))
+                (-ui-common/render-workspace selected-key)]]])]]]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
