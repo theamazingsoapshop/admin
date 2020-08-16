@@ -1,5 +1,15 @@
 (ns za.co.theamazingsoapshop.admin.ui.svg)
 
+(defn chevron-right [classes]
+  [:svg
+   {:stroke "currentColor", :viewBox "0 0 24 24", :fill "none"
+    :class classes}
+   [:path
+    {:d "M9 5l7 7-7 7",
+     :stroke-width "2",
+     :stroke-linejoin "round",
+     :stroke-linecap "round"}]])
+
 (defn credit-card [classes]
   [:svg
    {:stroke "currentColor"
@@ -82,7 +92,7 @@
 
 (defn ticket [classes]
   [:svg {:stroke "currentColor"
-         :viewbox "0 0 24 24"
+         :viewBox "0 0 24 24"
          :fill "none"
          :class classes}
    [:path
@@ -103,6 +113,15 @@
      :stroke-linejoin "round",
      :stroke-linecap "round"}]])
 
+(defn payment [classes]
+  [:svg
+   {:fill "currentColor", :viewBox "0 0 20 20"
+    :class classes}
+   [:path
+    {:clip-rule "evenodd",
+     :d
+     "M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z",
+     :fill-rule "evenodd"}]])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -113,4 +132,5 @@
 (defmethod icon-for :za.co.theamazingsoapshop.admin.ui.app/logout [_ classes] [logout classes])
 (defmethod icon-for :za.co.theamazingsoapshop.admin.ui.payments/completed [_ classes] [credit-card classes])
 (defmethod icon-for :za.co.theamazingsoapshop.admin.ui.payments/pending [_ classes] [document-text classes])
+(defmethod icon-for :za.co.theamazingsoapshop.admin.ui.payments/narrow-invoice-list-item [_ classes] [payment classes])
 

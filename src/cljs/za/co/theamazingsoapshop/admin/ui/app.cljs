@@ -100,6 +100,37 @@
                                            (set-select-key-fn (:key %)))))
                 (map #(assoc % :text (menu-text %))))))
 
+(defn sidebar [{:as system}]
+  [:div.fixed.inset-0.overflow-hidden
+   [:div.absolute.inset-0.overflow-hidden
+    ;; "<!--\n      Background overlay, show/hide based on slide-over state.\n\n      Entering: \"ease-in-out duration-500\"\n        From: \"opacity-0\"\n        To: \"opacity-100\"\n      Leaving: \"ease-in-out duration-500\"\n        From: \"opacity-100\"\n        To: \"opacity-0\"\n    -->"
+    [:div.absolute.inset-0.bg-gray-500.bg-opacity-75.transition-opacity]
+    [:section.absolute.inset-y-0.right-0.pl-10.max-w-full.flex
+     ;; "<!--\n        Slide-over panel, show/hide based on slide-over state.\n\n        Entering: \"transform transition ease-in-out duration-500 sm:duration-700\"\n          From: \"translate-x-full\"\n          To: \"translate-x-0\"\n        Leaving: \"transform transition ease-in-out duration-500 sm:duration-700\"\n          From: \"translate-x-0\"\n          To: \"translate-x-full\"\n      -->"
+     [:div.w-screen.max-w-md
+      [:div.h-full.flex.flex-col.space-y-6.py-6.bg-white.shadow-xl.overflow-y-scroll
+       [:header.px-4.sm:px-6
+        [:div.flex.items-start.justify-between.space-x-3
+         [:h2.text-lg.leading-7.font-medium.text-gray-900
+          "\n                Panel title\n              "]
+         [:div.h-7.flex.items-center
+          [:button.text-gray-400.hover:text-gray-500.transition.ease-in-out.duration-150
+           {:aria-label "Close panel"}
+           [:svg.h-6.w-6
+            {:stroke "currentColor",
+             :viewbox "0 0 24 24",
+             :fill "none"}
+            [:path
+             {:d "M6 18L18 6M6 6l12 12",
+              :stroke-width "2",
+              :stroke-linejoin "round",
+              :stroke-linecap "round"}]]]]]]
+       [:div.relative.flex-1.px-4.sm:px-6
+        "<!-- Replace with your content -->"
+        [:div.absolute.inset-0.px-4.sm:px-6
+         [:div.h-full.border-2.border-dashed.border-gray-200]]
+        "<!-- /End replace -->"]]]]]])
+
 (defn ui [{system ::app}]
   (let [state (::state system)
         user-profile {:person/firstname "Pieter"
@@ -175,7 +206,7 @@
                                                                        " group-hover:text-" color "-300"
                                                                        " group-focus:text-" color "-300"
                                                                        ))))]
-                ^{:key (str "wide-menu-item-" (:key menu-item))} 
+                ^{:key (str "wide-menu-item-" (:key menu-item))}
                 [wide-menu-item menu-item])
 
 
@@ -186,7 +217,7 @@
          [:div.flex.flex-col.w-0.flex-1.overflow-hidden
           [:div.md:hidden.pl-1.pt-1.sm:pl-3.sm:pt-3
            [:button.-ml-0.5.-mt-0.5.h-12.w-12.inline-flex.items-center.justify-center.rounded-md.text-gray-500.hover:text-gray-900.focus:outline-none.focus:bg-gray-200.transition.ease-in-out.duration-150
-            {:aria-label "Open sidebar"
+            {:aria-label "Open menu"
              :on-click #(swap! state assoc :small-screen-menu-hidden false)}
             [-svg/open-sidebar "h-6 w-6"]]]
 
@@ -199,7 +230,9 @@
                [:h1.text-2xl.font-semibold.text-gray-900 (:text selected-menu-item)]]
               [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
                [:div.py-4
-                (-ui-common/render-workspace selected-key)]]])]]]))))
+                (-ui-common/render-workspace selected-key)]]])]
+
+          [sidebar system]]]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
