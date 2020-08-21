@@ -7,7 +7,7 @@
 
 (defprotocol ISidebar
   (get-state [this] "Gets the reagent atom containing the state for the UI of this component")
-  (set-sidebar [this] "Sets the component that must be displayde in the sidebar and opens it.")
+  (show [this] "Sets the component that must be displayde in the sidebar and opens it.")
   (close-sidebar [this] "Closes / Cancels the current sidebar"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -48,8 +48,9 @@
     [cfg]
   ISidebar
   (get-state [_] (::state cfg))
-  (set-sidebar [_]
-    (log/warn ::set-sidebar "Not implemented yet"))
+  (show [x]
+    (log/warn ::set-sidebar "Not implemented yet"
+              ::x x))
   (close-sidebar [_]
     (log/debug ::close-sidebar ::called
                ::cfg cfg)

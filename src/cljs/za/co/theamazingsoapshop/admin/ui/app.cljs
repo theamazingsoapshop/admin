@@ -101,7 +101,8 @@
                                            (set-select-key-fn (:key %)))))
                 (map #(assoc % :text (menu-text %))))))
 
-(defn ui [{system ::app}]
+(defn ui [{system ::app
+           :as main-system}]
   (let [state (::state system)
         user-profile {:person/firstname "Pieter"
                       :person/lastname "Breed"
@@ -197,7 +198,8 @@
                [:h1.text-2xl.font-semibold.text-gray-900 (:text selected-menu-item)]]
               [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
                [:div.py-4
-                (-ui-common/render-workspace selected-key)]]])]
+                (log/debug ::system system)
+                (-ui-common/render-workspace selected-key main-system)]]])]
 
           [-sidebar/sidebar system]]]))))
 

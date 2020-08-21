@@ -1,12 +1,15 @@
 (ns za.co.theamazingsoapshop.admin.ui.payments
   (:require [za.co.theamazingsoapshop.admin.ui.svg :as -svg]
             [za.co.theamazingsoapshop.admin.ui.common :as -ui-common]
+            [za.co.theamazingsoapshop.admin.ui.sidebar :as -siderbar]
             [reagent.core :as r]
             [clojure.string :as str]
             [integrant.core :as ig]
-            [lambdaisland.glogi :as log]))
+            [lambdaisland.glogi :as log]
+            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]))
 
-(defn open-item-btn [{:keys [text]}]
+(defn open-item-btn [{:keys [text on-click]
+                      :as item}]
   [:span.inline-flex.rounded-md.shadow-sm
    [:button
     {:class (str " inline-flex items-center px-4 py-2 border border-transparent text-sm leading-6 font-medium rounded-md text-white "
@@ -17,6 +20,8 @@
                  "focus:shadow-outline- "-ui-common/color " "
                  "active:bg-" -ui-common/color "-700 "
                  "transition ease-in-out duration-150")
+     :on-click #(do (log/debug ::clicked (str %))
+                    (on-click item))
      :type "button"} text]])
 
 (defn overview-card
@@ -42,10 +47,12 @@
   [:div.mt-2 content])
 
 (defn narrow-invoice-list-item [{:person/keys [firstname lastname email]
-                                 :invoice/keys [amount currency-code currency-symbol
-                                                date]}]
+                                 :invoice/keys [amount currency-code currency-symbol date]
+                                 :as item
+                                 on-click :on-click}]
   [:a.block.px-4.py-4.bg-white.hover:bg-cool-gray-50
-   {:href "#"}
+   {:on-click #(do (log/debug ::clicked (pr-str item))
+                   (when on-click (on-click item)))}
    [:div.flex.items-center.space-x-4
     [:div.flex-1.flex.space-x-2.truncate
      [-svg/icon-for ::narrow-invoice-list-item " flex-shrink-0 h-5 w-5 text-cool-gray-400"]
@@ -59,8 +66,12 @@
 
 
 
-(defn invoices []
-  (let [invoices [{:person/firstname "Pieter"
+(defn invoices [{:as system
+                 :keys [::-siderbar/sidebar]}]
+  (log/debug ::system system)
+  (let [view-invoice-fn (fn [invoice-item]
+                          (log/info ::viewing-invoice invoice-item))
+        invoices [{:person/firstname "Pieter"
                    :person/lastname "Breed"
                    :person/email "pieter@pb.co.za"
                    :invoice/amount "1234"
@@ -90,7 +101,7 @@
               :person/keys [firstname lastname]
               :invoice/keys [date]} invoices]
          ^{:key (str date "narrow_invoice_item_" firstname "-" lastname)}
-         [:li (narrow-invoice-list-item invoice)])]
+         [:li (narrow-invoice-list-item (assoc invoice :on-click view-invoice-fn))])]
 
       [:nav.bg-white.px-4.py-3.flex.items-center.justify-between.border-t.border-cool-gray-200
        [:div.flex-1.flex.justify-between
@@ -123,7 +134,8 @@
                 (log/debug ::invoices invoices)
                 (for [{:person/keys [firstname lastname email]
                        :invoice/keys [amount date
-                                      currency-code currency-symbol]} invoices]
+                                      currency-code currency-symbol]
+                       :as invoice} invoices]
                   ^{:key (str date "wide_invoice_item_" firstname "-" lastname)}
                   [:tr
                    (first-col-fn (str firstname " " lastname))
@@ -133,7 +145,8 @@
                               [:span.font-bold amount] " "
                               [:span currency-code]])
                    (item-col date)
-                   (item-col [open-item-btn {:text "Open"}])]))]])]]]]]))
+                   (item-col [open-item-btn {:text "Open"
+                                             :on-click #(view-invoice-fn invoice)}])]))]])]]]]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -218,7 +231,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod -ui-common/render-workspace ::payments
-  [_ {:as system}]
+  [_ {system ::payments
+      :keys [::-sidebar/sidebar]}]
   [:div
    [:div
     [section-header "Overview"]
@@ -233,7 +247,7 @@
                         :icon [-svg/icon-for ::pending icon-classes]})]])]
    [:div.my-4
     [section-header "Pending Transactions"]
-    [section-content [invoices]]]
+    [section-content [invoices system]]]
 
    [:div.my-4
     [section-header "Completed Payments"]
@@ -241,3 +255,7 @@
 
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmethod ig/init-key ::payments
+  [_ cfg] cfg)

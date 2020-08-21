@@ -28,7 +28,10 @@
 
 (defn make-default-config []
   {::-app/app         {::-sidebar/sidebar (ig/ref ::-sidebar/sidebar)}
-   ::-sidebar/sidebar {}})
+   ::-sidebar/sidebar {}
+
+   :za.co.theamazingsoapshop.admin.ui.payments/payments
+   {::-sidebar/sidebar (ig/ref ::-sidebar/sidebar)}})
 
 (defonce system (r/atom nil))
 
