@@ -64,15 +64,38 @@
       [:p (str "Issued on " date)]]]
     [-svg/chevron-right " flex-shrink-0 h-5 w-5 text-cool-gray-400"]]])
 
+(defn invoice-item-ui
+  [{:person/keys  [firstname lastname email]
+    :invoice/keys [amount currency-code currency-symbol date]
+    :as           item}]
+  (log/debug ::invoice-item-component item)
+  [:div
+   [:div.mt-5.border-t.border-gray-200.pt-5
+    [:dl
+     [:div.sm:grid.sm:grid-cols-3.sm:gap-4
+      [:dt.text-sm.leading-5.font-medium.text-gray-500 "Full name"]
+      [:dd.mt-1.text-sm.leading-5.text-gray-900.sm:mt-0.sm:col-span-2 (str firstname " " lastname)]]
+     [:div.mt-8.sm:grid.sm:mt-5.sm:grid-cols-3.sm:gap-4.sm:border-t.sm:border-gray-200.sm:pt-5
+      [:dt.text-sm.leading-5.font-medium.text-gray-500 "Email address"]
+      [:dd.mt-1.text-sm.leading-5.text-gray-900.sm:mt-0.sm:col-span-2 email]]
+     [:div.mt-8.sm:grid.sm:mt-5.sm:grid-cols-3.sm:gap-4.sm:border-t.sm:border-gray-200.sm:pt-5
+      [:dt.text-sm.leading-5.font-medium.text-gray-500 "Amount"]
+      [:dd.mt-1.text-sm.leading-5.text-gray-900.sm:mt-0.sm:col-span-2 (str currency-symbol " "
+                                                                           amount " "
+                                                                           currency-code)]]
+     [:div.mt-8.sm:grid.sm:mt-5.sm:grid-cols-3.sm:gap-4.sm:border-t.sm:border-gray-200.sm:pt-5
+      [:dt.text-sm.leading-5.font-medium.text-gray-500 "Issue date"]
+      [:dd.mt-1.text-sm.leading-5.text-gray-900.sm:mt-0.sm:col-span-2 date]]]]])
+
+(defn invoice-item-sidebar-title
+  [{:person/keys [firstname lastname email]}]
+  (str firstname " " lastname))
+
 (deftype InvoiceItem
     [item]
   -ui-common/ISidebarComponent
-  (sidebar-title [_]
-    (let [{:person/keys [firstname lastname]} item]
-      (str "Invoice: " firstname " " lastname)))
-  (sidebar-component [this]
-    (log/debug ::invoice-item-component this)
-    [:div [:p "Default invoice component render"]]))
+  (sidebar-title [this] (invoice-item-sidebar-title item))
+  (sidebar-component [this] (invoice-item-ui item)))
 
 (comment
 
@@ -86,27 +109,27 @@
                           (log/info ::viewing-invoice invoice-item)
                           (-sidebar/show sidebar
                                          (InvoiceItem. invoice-item)))
-        invoices [{:person/firstname "Pieter"
-                   :person/lastname "Breed"
-                   :person/email "pieter@pb.co.za"
-                   :invoice/amount "1234"
-                   :invoice/currency-code "ZAR"
+        invoices [{:person/firstname        "Pieter"
+                   :person/lastname         "Breed"
+                   :person/email            "pieter@pb.co.za"
+                   :invoice/amount          "1234"
+                   :invoice/currency-code   "ZAR"
                    :invoice/currency-symbol "R"
-                   :invoice/date "20 November 1980"}
-                  {:person/firstname "Andrew"
-                   :person/lastname "Jones"
-                   :person/email "andrew@jones.co.za"
-                   :invoice/amount "7655"
-                   :invoice/currency-code "ZAR"
+                   :invoice/date            "20 November 1980"}
+                  {:person/firstname        "Andrew"
+                   :person/lastname         "Jones"
+                   :person/email            "andrew@jones.co.za"
+                   :invoice/amount          "7655"
+                   :invoice/currency-code   "ZAR"
                    :invoice/currency-symbol "R"
-                   :invoice/date "4 July 1999"}
-                  {:person/firstname "Priscilla"
-                   :person/lastname "of the Desert, Queen"
-                   :person/email "cillar@queen.com"
-                   :invoice/amount "675"
-                   :invoice/currency-code "ZAR"
+                   :invoice/date            "4 July 1999"}
+                  {:person/firstname        "Priscilla"
+                   :person/lastname         "of the Desert, Queen"
+                   :person/email            "cillar@queen.com"
+                   :invoice/amount          "675"
+                   :invoice/currency-code   "ZAR"
                    :invoice/currency-symbol "R"
-                   :invoice/date "20 April 1981"}]]
+                   :invoice/date            "20 April 1981"}]]
     [:div
 
      ;; invoices for narrow screens, presented as unordered list items
