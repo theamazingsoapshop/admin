@@ -18,6 +18,6 @@
   [t system] [:div [:p "Default sidebar"]])
 
 (defprotocol ISidebarComponent
-  (title [this] "Provides the title text for the sidebar component")
-  (component [this] "Provides the main UI for the sidebar component"))
+  (sidebar-title [this] "Provides the title text for the sidebar component")
+  (sidebar-component [this] "Provides the main UI for the sidebar component"))
 

@@ -64,13 +64,28 @@
       [:p (str "Issued on " date)]]]
     [-svg/chevron-right " flex-shrink-0 h-5 w-5 text-cool-gray-400"]]])
 
+(deftype InvoiceItem
+    [item]
+  -ui-common/ISidebarComponent
+  (sidebar-title [_]
+    (let [{:person/keys [firstname lastname]} item]
+      (str "Invoice: " firstname " " lastname)))
+  (sidebar-component [this]
+    (log/debug ::invoice-item-component this)
+    [:div [:p "Default invoice component render"]]))
+
+(comment
+
+  (def ii (InvoiceItem. {:a a})))
 
 
 (defn invoices [{:as system
                  :keys [::-siderbar/sidebar]}]
   (log/debug ::system system)
   (let [view-invoice-fn (fn [invoice-item]
-                          (log/info ::viewing-invoice invoice-item))
+                          (log/info ::viewing-invoice invoice-item)
+                          (-sidebar/show sidebar
+                                         (InvoiceItem. invoice-item)))
         invoices [{:person/firstname "Pieter"
                    :person/lastname "Breed"
                    :person/email "pieter@pb.co.za"
