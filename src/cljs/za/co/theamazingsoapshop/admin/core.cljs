@@ -13,7 +13,8 @@
             [cljs.core.async :as csp]
             md5.core
             [integrant.core :as ig]
-            [za.co.theamazingsoapshop.admin.ui.app :as -app]))
+            [za.co.theamazingsoapshop.admin.ui.app :as -app]
+            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]))
 
 (glogi-console/install!)
 
@@ -26,7 +27,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-default-config []
-  {::-app/app {}})
+  {::-app/app         {::-sidebar/sidebar (ig/ref ::-sidebar/sidebar)}
+   ::-sidebar/sidebar {}})
 
 (defonce system (r/atom nil))
 

@@ -2,6 +2,7 @@
   (:require [za.co.theamazingsoapshop.admin.ui.svg :as -svg]
             [za.co.theamazingsoapshop.admin.ui.common :as -ui-common]
             [za.co.theamazingsoapshop.admin.ui.payments :as -payments]
+            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
             [reagent.core :as r]
             [clojure.string :as str]
             [integrant.core :as ig]
@@ -10,7 +11,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(def color "green")
+(def color -ui-common/color)
 
 (defn mobile-menu-view-profile
   [{:person/keys [firstname lastname email]}]
@@ -100,37 +101,6 @@
                                            (set-select-key-fn (:key %)))))
                 (map #(assoc % :text (menu-text %))))))
 
-(defn sidebar [{:as system}]
-  [:div.fixed.inset-0.overflow-hidden
-   [:div.absolute.inset-0.overflow-hidden
-    ;; "<!--\n      Background overlay, show/hide based on slide-over state.\n\n      Entering: \"ease-in-out duration-500\"\n        From: \"opacity-0\"\n        To: \"opacity-100\"\n      Leaving: \"ease-in-out duration-500\"\n        From: \"opacity-100\"\n        To: \"opacity-0\"\n    -->"
-    [:div.absolute.inset-0.bg-gray-500.bg-opacity-75.transition-opacity]
-    [:section.absolute.inset-y-0.right-0.pl-10.max-w-full.flex
-     ;; "<!--\n        Slide-over panel, show/hide based on slide-over state.\n\n        Entering: \"transform transition ease-in-out duration-500 sm:duration-700\"\n          From: \"translate-x-full\"\n          To: \"translate-x-0\"\n        Leaving: \"transform transition ease-in-out duration-500 sm:duration-700\"\n          From: \"translate-x-0\"\n          To: \"translate-x-full\"\n      -->"
-     [:div.w-screen.max-w-md
-      [:div.h-full.flex.flex-col.space-y-6.py-6.bg-white.shadow-xl.overflow-y-scroll
-       [:header.px-4.sm:px-6
-        [:div.flex.items-start.justify-between.space-x-3
-         [:h2.text-lg.leading-7.font-medium.text-gray-900
-          "\n                Panel title\n              "]
-         [:div.h-7.flex.items-center
-          [:button.text-gray-400.hover:text-gray-500.transition.ease-in-out.duration-150
-           {:aria-label "Close panel"}
-           [:svg.h-6.w-6
-            {:stroke "currentColor",
-             :viewbox "0 0 24 24",
-             :fill "none"}
-            [:path
-             {:d "M6 18L18 6M6 6l12 12",
-              :stroke-width "2",
-              :stroke-linejoin "round",
-              :stroke-linecap "round"}]]]]]]
-       [:div.relative.flex-1.px-4.sm:px-6
-        "<!-- Replace with your content -->"
-        [:div.absolute.inset-0.px-4.sm:px-6
-         [:div.h-full.border-2.border-dashed.border-gray-200]]
-        "<!-- /End replace -->"]]]]]])
-
 (defn ui [{system ::app}]
   (let [state (::state system)
         user-profile {:person/firstname "Pieter"
@@ -162,7 +132,7 @@
             {:class (str "bg-" color "-800")}
             [:div.absolute.top-0.right-0.-mr-14.p-1
              [:button.flex.items-center.justify-center.h-12.w-12.rounded-full.focus:outline-none.focus:bg-gray-600
-              {:aria-label "Close sidebar"
+              {:aria-label "Close menu"
                :on-click #(swap! state assoc :small-screen-menu-hidden true)}
               [-svg/close-sidebar "h-6 w-6 text-white"]]]
             [:div.flex-1.h-0.pt-5.pb-4.overflow-y-auto
@@ -185,9 +155,7 @@
             [:div.flex-shrink-0.flex.border-t.p-4
              {:class (str "border-" color "-700")}
              [mobile-menu-view-profile user-profile]]]
-           [:div.flex-shrink-0.w-14
-            ;;"<!-- Force sidebar to shrink to fit close icon -->"
-            ]]]
+           [:div.flex-shrink-0.w-14]]]
          ;;"<!-- Static sidebar for desktop -->"
          [:div.hidden.md:flex.md:flex-shrink-0
           [:div.flex.flex-col.w-64
@@ -224,7 +192,6 @@
           [:main.flex-1.relative.z-0.overflow-y-auto.focus:outline-none
            {:tabIndex "0"}
            (when (or selected-menu-item)
-             (log/debug ::selected-menu-item selected-menu-item)
              [:div.pt-2.pb-6.md:py-6
               [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
                [:h1.text-2xl.font-semibold.text-gray-900 (:text selected-menu-item)]]
@@ -232,7 +199,7 @@
                [:div.py-4
                 (-ui-common/render-workspace selected-key)]]])]
 
-          [sidebar system]]]))))
+          [-sidebar/sidebar system]]]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

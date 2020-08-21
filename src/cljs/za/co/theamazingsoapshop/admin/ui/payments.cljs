@@ -6,6 +6,19 @@
             [integrant.core :as ig]
             [lambdaisland.glogi :as log]))
 
+(defn open-item-btn [{:keys [text]}]
+  [:span.inline-flex.rounded-md.shadow-sm
+   [:button
+    {:class (str " inline-flex items-center px-4 py-2 border border-transparent text-sm leading-6 font-medium rounded-md text-white "
+                 "bg-" -ui-common/color "-600 "
+                 "hover:bg-" -ui-common/color "-500 "
+                 "focus:outline-none "
+                 "focus:border-" -ui-common/color "-700 "
+                 "focus:shadow-outline- "-ui-common/color " "
+                 "active:bg-" -ui-common/color "-700 "
+                 "transition ease-in-out duration-150")
+     :type "button"} text]])
+
 (defn overview-card
   [{:keys [icon title value]}]
   [:div.bg-white.overflow-hidden.shadow.rounded-lg
@@ -93,28 +106,34 @@
       [:div.flex.flex-col
         [:div.-my-2.py-2.overflow-x-auto.sm:-mx-6.sm:px-6.lg:-mx-8.lg:px-8
          [:div.align-middle.inline-block.min-w-full.shadow.overflow-hidden.sm:rounded-lg.border-b.border-gray-200
-          [:table.min-w-full.divide-y.divide-gray-200
-           [:thead
-            [:tr
-             [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider "name"]
-             [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider "email"]
-             [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider "amount"]
-             [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider "date"]]]
-           [:tbody.bg-white.divide-y.divide-gray-200
-            (do
-              (log/debug ::invoices invoices)
-              (for [{:person/keys [firstname lastname email]
-                     :invoice/keys [amount date
-                                    currency-code currency-symbol]} invoices]
-                ^{:key (str date "wide_invoice_item_" firstname "-" lastname)}
+          (let [first-col-fn
+                (fn [s] [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.font-medium.text-gray-900 s])
+
+                item-col
+                (fn [s] [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500 s])]
+            [:table.min-w-full.divide-y.divide-gray-200
+             [:thead
+              (let [headings ["name" "email" "amount" "date" "action"]]
                 [:tr
-                 [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.font-medium.text-gray-900 (str firstname " " lastname)]
-                 [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500 email]
-                 [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500 [:span
-                                                                                    [:span currency-symbol] " "
-                                                                                    [:span.font-bold amount] " "
-                                                                                    [:span currency-code]]]
-                 [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500 date]]))]]]]]]]))
+                 (for [heading headings]
+                   ^{:key (str "wide-screen-invoice-heading-" heading)}
+                   [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider heading])])]
+             [:tbody.bg-white.divide-y.divide-gray-200
+              (do
+                (log/debug ::invoices invoices)
+                (for [{:person/keys [firstname lastname email]
+                       :invoice/keys [amount date
+                                      currency-code currency-symbol]} invoices]
+                  ^{:key (str date "wide_invoice_item_" firstname "-" lastname)}
+                  [:tr
+                   (first-col-fn (str firstname " " lastname))
+                   (item-col email)
+                   (item-col [:span
+                              [:span currency-symbol] " "
+                              [:span.font-bold amount] " "
+                              [:span currency-code]])
+                   (item-col date)
+                   (item-col [open-item-btn {:text "Open"}])]))]])]]]]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
