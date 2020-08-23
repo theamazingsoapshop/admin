@@ -2,24 +2,26 @@
   (:require [za.co.theamazingsoapshop.admin.ui.svg :as -svg]
             [za.co.theamazingsoapshop.admin.ui.common :as -ui-common]
             [za.co.theamazingsoapshop.admin.ui.sidebar :as -siderbar]
+            [za.co.theamazingsoapshop.admin.ui.tables :as -tables]
             [reagent.core :as r]
             [clojure.string :as str]
             [integrant.core :as ig]
             [lambdaisland.glogi :as log]
-            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]))
+            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
+            [cljs-gravatar.core :as gravatar]))
 
 (defn open-item-btn [{:keys [text on-click]
                       :as item}]
   [:span.inline-flex.rounded-md.shadow-sm
    [:button
-    {:class (str " inline-flex items-center px-4 py-2 border border-transparent text-sm leading-6 font-medium rounded-md text-white "
-                 "bg-" -ui-common/color "-600 "
-                 "hover:bg-" -ui-common/color "-500 "
-                 "focus:outline-none "
-                 "focus:border-" -ui-common/color "-700 "
-                 "focus:shadow-outline- "-ui-common/color " "
-                 "active:bg-" -ui-common/color "-700 "
-                 "transition ease-in-out duration-150")
+    {:class (str " inline-flex items-center px-4 py-2 border border-transparent text-sm leading-6 font-medium rounded-md text-white"
+                 " bg-" -ui-common/color "-600"
+                 " hover:bg-" -ui-common/color "-500"
+                 " focus:outline-none"
+                 " focus:border-" -ui-common/color "-700"
+                 " focus:shadow-outline- " -ui-common/color
+                 " active:bg-" -ui-common/color "-700"
+                 " transition ease-in-out duration-150")
      :on-click #(do (log/debug ::clicked (str %))
                     (on-click item))
      :type "button"} text]])
@@ -79,6 +81,10 @@
       [:dt.text-sm.leading-5.font-medium.text-gray-500 "Email address"]
       [:dd.mt-1.text-sm.leading-5.text-gray-900.sm:mt-0.sm:col-span-2 email]]
      [:div.mt-8.sm:grid.sm:mt-5.sm:grid-cols-3.sm:gap-4.sm:border-t.sm:border-gray-200.sm:pt-5
+      [:dt.text-sm.leading-5.font-medium.text-gray-500 "Gravatar"]
+      [:dd.mt-1.text-sm.leading-5.text-gray-900.sm:mt-0.sm:col-span-2
+       [:img {:src (gravatar/url email)}]]]
+     [:div.mt-8.sm:grid.sm:mt-5.sm:grid-cols-3.sm:gap-4.sm:border-t.sm:border-gray-200.sm:pt-5
       [:dt.text-sm.leading-5.font-medium.text-gray-500 "Amount"]
       [:dd.mt-1.text-sm.leading-5.text-gray-900.sm:mt-0.sm:col-span-2 (str currency-symbol " "
                                                                            amount " "
@@ -88,8 +94,7 @@
       [:dd.mt-1.text-sm.leading-5.text-gray-900.sm:mt-0.sm:col-span-2 date]]]]])
 
 (defn invoice-item-sidebar-title
-  [{:person/keys [firstname lastname email]}]
-  (str firstname " " lastname))
+  [_] "Invoice Detail")
 
 (deftype InvoiceItem
     [item]
@@ -156,17 +161,28 @@
         [:div.-my-2.py-2.overflow-x-auto.sm:-mx-6.sm:px-6.lg:-mx-8.lg:px-8
          [:div.align-middle.inline-block.min-w-full.shadow.overflow-hidden.sm:rounded-lg.border-b.border-gray-200
           (let [first-col-fn
-                (fn [s] [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.font-medium.text-gray-900 s])
+                (fn [s classes] [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.font-medium.text-gray-900
+                                 {:class (str classes)}
+                                 s])
 
                 item-col
-                (fn [s] [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500 s])]
+                (fn [s classes] [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500
+                                 {:class (str classes)}
+                                 s])]
             [:table.min-w-full.divide-y.divide-gray-200
              [:thead
-              (let [headings ["name" "email" "amount" "date" "action"]]
+              (let [headings [{:txt "name"}
+                              {:txt "email"
+                               :classes "hidden lg:table-cell"}
+                              {:txt "amount"}
+                              {:txt "date"}
+                              {:txt "action"}]]
                 [:tr
-                 (for [heading headings]
-                   ^{:key (str "wide-screen-invoice-heading-" heading)}
-                   [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider heading])])]
+                 (for [{:keys [txt classes]} headings]
+                   ^{:key (str "wide-screen-invoice-heading-" txt)}
+                   [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider
+                    {:class (str classes)}
+                    txt])])]
              [:tbody.bg-white.divide-y.divide-gray-200
               (do
                 (log/debug ::invoices invoices)
@@ -176,15 +192,18 @@
                        :as invoice} invoices]
                   ^{:key (str date "wide_invoice_item_" firstname "-" lastname)}
                   [:tr
-                   (first-col-fn (str firstname " " lastname))
-                   (item-col email)
+                   (first-col-fn (str firstname " " lastname)
+                                 nil)
+                   (item-col email "hidden lg:table-cell")
                    (item-col [:span
                               [:span currency-symbol] " "
                               [:span.font-bold amount] " "
-                              [:span currency-code]])
-                   (item-col date)
+                              [:span currency-code]]
+                             nil)
+                   (item-col date nil)
                    (item-col [open-item-btn {:text "Open"
-                                             :on-click #(view-invoice-fn invoice)}])]))]])]]]]]))
+                                             :on-click #(view-invoice-fn invoice)}]
+                             nil)]))]])]]]]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
