@@ -3,11 +3,11 @@
             [za.co.theamazingsoapshop.admin.ui.common :as -ui-common]
             [za.co.theamazingsoapshop.admin.ui.sidebar :as -siderbar]
             [za.co.theamazingsoapshop.admin.ui.tables :as -tables]
+            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
             [reagent.core :as r]
             [clojure.string :as str]
             [integrant.core :as ig]
             [lambdaisland.glogi :as log]
-            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
             [cljs-gravatar.core :as gravatar]))
 
 (defn open-item-btn [{:keys [text on-click]
@@ -104,106 +104,125 @@
 
 (comment
 
-  (def ii (InvoiceItem. {:a a})))
+  (def ii (InvoiceItem. {:a a}))
+
+  (-tables/make-table {::-tables/table-id "payments-invoices"
+                       ::-tables/columns columns
+                       ::-tables/row-data (-tables/maps->rows
+                                           {::-tables/id-fn #(str "invoice-" (:person/firstame %) "-" (:person/lastname %))
+                                            ::-tables/col-fns (sorted-map ::name #(str (:person/firstname %) " " (:person/lastname %))
+                                                                          ::email #(str (:person/email %))
+                                                                          ::amount (fn [x]
+                                                                                     [:span
+                                                                                      [:span (:invoice/currency-symbol x)] " "
+                                                                                      [:span.font-bold (:invoice/amount x)] " "
+                                                                                      [:span (:invoice/currency-code x)]])
+                                                                          ::date #(str (:invoice/date %))
+                                                                          ::action (fn [x] [open-item-btn {:text "Open"
+                                                                                                           :on-click #(view-invoice-fn x)}]))}
+                                           [{:person/firstname        "Pieter"
+                                             :person/lastname         "Breed"
+                                             :person/email            "pieter@pb.co.za"
+                                             :invoice/amount          "1234"
+                                             :invoice/currency-code   "ZAR"
+                                             :invoice/currency-symbol "R"
+                                             :invoice/date            "20 November 1980"}
+                                            {:person/firstname        "Andrew"
+                                             :person/lastname         "Jones"
+                                             :person/email            "andrew@jones.co.za"
+                                             :invoice/amount          "7655"
+                                             :invoice/currency-code   "ZAR"
+                                             :invoice/currency-symbol "R"
+                                             :invoice/date            "4 July 1999"}
+                                            {:person/firstname        "Priscilla"
+                                             :person/lastname         "of the Desert, Queen"
+                                             :person/email            "cillar@queen.com"
+                                             :invoice/amount          "675"
+                                             :invoice/currency-code   "ZAR"
+                                             :invoice/currency-symbol "R"
+                                             :invoice/date            "20 April 1981"}])})
+
+
+
+  )
 
 
 (defn invoices [{:as system
                  :keys [::-siderbar/sidebar]}]
   (log/debug ::system system)
-  (let [view-invoice-fn (fn [invoice-item]
-                          (log/info ::viewing-invoice invoice-item)
-                          (-sidebar/show sidebar
-                                         (InvoiceItem. invoice-item)))
-        invoices [{:person/firstname        "Pieter"
-                   :person/lastname         "Breed"
-                   :person/email            "pieter@pb.co.za"
-                   :invoice/amount          "1234"
-                   :invoice/currency-code   "ZAR"
-                   :invoice/currency-symbol "R"
-                   :invoice/date            "20 November 1980"}
-                  {:person/firstname        "Andrew"
-                   :person/lastname         "Jones"
-                   :person/email            "andrew@jones.co.za"
-                   :invoice/amount          "7655"
-                   :invoice/currency-code   "ZAR"
-                   :invoice/currency-symbol "R"
-                   :invoice/date            "4 July 1999"}
-                  {:person/firstname        "Priscilla"
-                   :person/lastname         "of the Desert, Queen"
-                   :person/email            "cillar@queen.com"
-                   :invoice/amount          "675"
-                   :invoice/currency-code   "ZAR"
-                   :invoice/currency-symbol "R"
-                   :invoice/date            "20 April 1981"}]]
-    [:div
+  (try
+    (let [view-invoice-fn (fn [invoice-item]
+                            (log/info ::viewing-invoice invoice-item)
+                            (-sidebar/show sidebar
+                                           (InvoiceItem. invoice-item)))
+          invoices [{:person/firstname        "Pieter"
+                     :person/lastname         "Breed"
+                     :person/email            "pieter@pb.co.za"
+                     :invoice/amount          "1234"
+                     :invoice/currency-code   "ZAR"
+                     :invoice/currency-symbol "R"
+                     :invoice/date            "20 November 1980"}
+                    {:person/firstname        "Andrew"
+                     :person/lastname         "Jones"
+                     :person/email            "andrew@jones.co.za"
+                     :invoice/amount          "7655"
+                     :invoice/currency-code   "ZAR"
+                     :invoice/currency-symbol "R"
+                     :invoice/date            "4 July 1999"}
+                    {:person/firstname        "Priscilla"
+                     :person/lastname         "of the Desert, Queen"
+                     :person/email            "cillar@queen.com"
+                     :invoice/amount          "675"
+                     :invoice/currency-code   "ZAR"
+                     :invoice/currency-symbol "R"
+                     :invoice/date            "20 April 1981"}]]
+      [:div
 
-     ;; invoices for narrow screens, presented as unordered list items
-     [:div.shadow.sm:hidden
-      [:ul.mt-2.divide-y.divide-cool-gray-200.overflow-hidden.shadow.sm:hidden
-       (for [{:as invoice
-              :person/keys [firstname lastname]
-              :invoice/keys [date]} invoices]
-         ^{:key (str date "narrow_invoice_item_" firstname "-" lastname)}
-         [:li (narrow-invoice-list-item (assoc invoice :on-click view-invoice-fn))])]
+       ;; invoices for narrow screens, presented as unordered list items
+       [:div.shadow.sm:hidden
+        [:ul.mt-2.divide-y.divide-cool-gray-200.overflow-hidden.shadow.sm:hidden
+         (for [{:as invoice
+                :person/keys [firstname lastname]
+                :invoice/keys [date]} invoices]
+           ^{:key (str date "narrow_invoice_item_" firstname "-" lastname)}
+           [:li (narrow-invoice-list-item (assoc invoice :on-click view-invoice-fn))])]
 
-      [:nav.bg-white.px-4.py-3.flex.items-center.justify-between.border-t.border-cool-gray-200
-       [:div.flex-1.flex.justify-between
-        [:a.relative.inline-flex.items-center.px-4.py-2.border.border-cool-gray-300.text-sm.leading-5.font-medium.rounded-md.text-cool-gray-700.bg-white.hover:text-cool-gray-500.focus:outline-none.focus:shadow-outline-blue.focus:border-blue-300.active:bg-cool-gray-100.active:text-cool-gray-700.transition.ease-in-out.duration-150
-         {:href "#"}
-         "\n                Previous\n              "]
-        [:a.ml-3.relative.inline-flex.items-center.px-4.py-2.border.border-cool-gray-300.text-sm.leading-5.font-medium.rounded-md.text-cool-gray-700.bg-white.hover:text-cool-gray-500.focus:outline-none.focus:shadow-outline-blue.focus:border-blue-300.active:bg-cool-gray-100.active:text-cool-gray-700.transition.ease-in-out.duration-150
-         {:href "#"}
-         "\n                Next\n              "]]]]
+        [:nav.bg-white.px-4.py-3.flex.items-center.justify-between.border-t.border-cool-gray-200
+         [:div.flex-1.flex.justify-between
+          [:a.relative.inline-flex.items-center.px-4.py-2.border.border-cool-gray-300.text-sm.leading-5.font-medium.rounded-md.text-cool-gray-700.bg-white.hover:text-cool-gray-500.focus:outline-none.focus:shadow-outline-blue.focus:border-blue-300.active:bg-cool-gray-100.active:text-cool-gray-700.transition.ease-in-out.duration-150
+           {:href "#"}
+           "\n                Previous\n              "]
+          [:a.ml-3.relative.inline-flex.items-center.px-4.py-2.border.border-cool-gray-300.text-sm.leading-5.font-medium.rounded-md.text-cool-gray-700.bg-white.hover:text-cool-gray-500.focus:outline-none.focus:shadow-outline-blue.focus:border-blue-300.active:bg-cool-gray-100.active:text-cool-gray-700.transition.ease-in-out.duration-150
+           {:href "#"}
+           "\n                Next\n              "]]]]
 
-     ;; invoices for wide screens, as a table
-     [:div.hidden.sm:block
-      [:div.flex.flex-col
-        [:div.-my-2.py-2.overflow-x-auto.sm:-mx-6.sm:px-6.lg:-mx-8.lg:px-8
-         [:div.align-middle.inline-block.min-w-full.shadow.overflow-hidden.sm:rounded-lg.border-b.border-gray-200
-          (let [first-col-fn
-                (fn [s classes] [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.font-medium.text-gray-900
-                                 {:class (str classes)}
-                                 s])
-
-                item-col
-                (fn [s classes] [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500
-                                 {:class (str classes)}
-                                 s])]
-            [:table.min-w-full.divide-y.divide-gray-200
-             [:thead
-              (let [headings [{:txt "name"}
-                              {:txt "email"
-                               :classes "hidden lg:table-cell"}
-                              {:txt "amount"}
-                              {:txt "date"}
-                              {:txt "action"}]]
-                [:tr
-                 (for [{:keys [txt classes]} headings]
-                   ^{:key (str "wide-screen-invoice-heading-" txt)}
-                   [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider
-                    {:class (str classes)}
-                    txt])])]
-             [:tbody.bg-white.divide-y.divide-gray-200
-              (do
-                (log/debug ::invoices invoices)
-                (for [{:person/keys [firstname lastname email]
-                       :invoice/keys [amount date
-                                      currency-code currency-symbol]
-                       :as invoice} invoices]
-                  ^{:key (str date "wide_invoice_item_" firstname "-" lastname)}
-                  [:tr
-                   (first-col-fn (str firstname " " lastname)
-                                 nil)
-                   (item-col email "hidden lg:table-cell")
-                   (item-col [:span
-                              [:span currency-symbol] " "
-                              [:span.font-bold amount] " "
-                              [:span currency-code]]
-                             nil)
-                   (item-col date nil)
-                   (item-col [open-item-btn {:text "Open"
-                                             :on-click #(view-invoice-fn invoice)}]
-                             nil)]))]])]]]]]))
+       ;; invoices for wide screens, as a table
+       [:div.hidden.sm:block
+        [:div.flex.flex-col
+         [:div.-my-2.py-2.overflow-x-auto.sm:-mx-6.sm:px-6.lg:-mx-8.lg:px-8
+          [-tables/make-table {::-tables/table-id  "payments-invoices"
+                               ::-tables/columns   [{::-tables/cell-fn       #(str (:person/firstname %) " " (:person/lastname %))
+                                                     ::-tables/column-header "name"}
+                                                    {::-tables/cell-fn        (comp str :person/email)
+                                                     ::-tables/column-header  "email"
+                                                     ::-tables/header-classes "hidden lg:table-cell"}
+                                                    {::-tables/cell-fn        (fn [x]
+                                                                                [:span
+                                                                                 [:span (:invoice/currency-symbol x)] " "
+                                                                                 [:span.font-bold (:invoice/amount x)] " "
+                                                                                 [:span (:invoice/currency-code x)]])
+                                                     ::-tables/column-header "amount"}
+                                                    {::-tables/cell-fn       (comp str :invoice/date)
+                                                     ::-tables/column-header "date"}
+                                                    {::-tables/cell-fn       (fn [x] [open-item-btn {:text     "Open"
+                                                                                                     :on-click #(view-invoice-fn x)}])
+                                                     ::-tables/column-header "action"}]
+                               ::-tables/row-data  invoices
+                               ::-tables/row-id-fn #(str (:person/firstname %) " " (:person/lastname %))}]]]]])
+    (catch :default e
+      (let [s (with-out-str (cljs.pprint/pprint e))]
+        (log/error ::error-handler s)
+        (:div [:p s])))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -260,30 +279,26 @@
      ;; payments for wide screens, as a table
      [:div.hidden.sm:block
       [:div.flex.flex-col
-        [:div.-my-2.py-2.overflow-x-auto.sm:-mx-6.sm:px-6.lg:-mx-8.lg:px-8
-         [:div.align-middle.inline-block.min-w-full.shadow.overflow-hidden.sm:rounded-lg.border-b.border-gray-200
-          [:table.min-w-full.divide-y.divide-gray-200
-           [:thead
-            [:tr
-             [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider "name"]
-             [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider "email"]
-             [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider "amount"]
-             [:th.px-6.py-3.bg-gray-50.text-left.text-xs.leading-4.font-medium.text-gray-500.uppercase.tracking-wider "date"]]]
-           [:tbody.bg-white.divide-y.divide-gray-200
-            (do
-              (log/debug ::invoices payments)
-              (for [{:person/keys [firstname lastname email]
-                     :payment/keys [amount date
-                                    currency-code currency-symbol]} payments]
-                ^{:key (str date "wide_invoice_item_" firstname "-" lastname)}
-                [:tr
-                 [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.font-medium.text-gray-900 (str firstname " " lastname)]
-                 [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500 email]
-                 [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500 [:span
-                                                                                    [:span currency-symbol] " "
-                                                                                    [:span.font-bold amount] " "
-                                                                                    [:span currency-code]]]
-                 [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500 date]]))]]]]]]]))
+       [:div.-my-2.py-2.overflow-x-auto.sm:-mx-6.sm:px-6.lg:-mx-8.lg:px-8
+        [-tables/make-table {::-tables/table-id  "payments"
+                               ::-tables/columns   [{::-tables/cell-fn       #(str (:person/firstname %) " " (:person/lastname %))
+                                                     ::-tables/column-header "name"}
+                                                    {::-tables/cell-fn        (comp str :person/email)
+                                                     ::-tables/column-header  "email"
+                                                     ::-tables/header-classes "hidden lg:table-cell"}
+                                                    {::-tables/cell-fn        (fn [x]
+                                                                                [:span
+                                                                                 [:span (:payment/currency-symbol x)] " "
+                                                                                 [:span.font-bold (:payment/amount x)] " "
+                                                                                 [:span (:payment/currency-code x)]])
+                                                     ::-tables/column-header "amount"}
+                                                    {::-tables/cell-fn       (comp str :payment/date)
+                                                     ::-tables/column-header "date"}
+                                                    {::-tables/cell-fn       (fn [x] [open-item-btn {:text     "Open"
+                                                                                                     :on-click identity}])
+                                                     ::-tables/column-header "action"}]
+                               ::-tables/row-data  payments
+                             ::-tables/row-id-fn #(str (:person/firstname %) " " (:person/lastname %))}]]]]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

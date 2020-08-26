@@ -103,105 +103,109 @@
 
 (defn ui [{system ::app
            :as main-system}]
-  (let [state (::state system)
-        user-profile {:person/firstname "Pieter"
-                      :person/lastname "Breed"
-                      :person/email "andrea.nyirenda@gmail.com"}]
+  (try 
+    (let [state (::state system)
 
-    (log/debug ::system system)
-    (fn []
-      (let [selected-key (-> @state :selected-menu-key)
-            set-selected-key #(do
-                                (log/debug ::setting-a-selected-key (pr-str %))
-                                (swap! state assoc :selected-menu-key %))
-            menu-items (make-menu-items (-> @state :selected-menu-key)
-                                        set-selected-key)
-            selected-menu-item (->> menu-items
-                                    (filter #(= selected-key (:key %)))
-                                    first)]
-        (log/debug ::selected-key selected-key)
-        [:div.h-screen.flex.overflow-hidden.bg-gray-100
-         (comment "<!-- Off-canvas menu for mobile -->")
-         [:div.md:hidden
-          {:class (str (when (-> @state (:small-screen-menu-hidden false)) "hidden"))}
-          [:div.fixed.inset-0.flex.z-40
-           (comment "<!--\n        Off-canvas menu overlay, show/hide based on off-canvas menu state.\n\n        Entering: \"transition-opacity ease-linear duration-300\"\n          From: \"opacity-0\"\n          To: \"opacity-100\"\n        Leaving: \"transition-opacity ease-linear duration-300\"\n          From: \"opacity-100\"\n          To: \"opacity-0\"\n      -->")
-           [:div.fixed.inset-0
-            [:div.absolute.inset-0.bg-gray-600.opacity-75]]
-           ;;"<!--\n        Off-canvas menu, show/hide based on off-canvas menu state.\n\n        Entering: \"transition ease-in-out duration-300 transform\"\n          From: \"-translate-x-full\"\n          To: \"translate-x-0\"\n        Leaving: \"transition ease-in-out duration-300 transform\"\n          From: \"translate-x-0\"\n          To: \"-translate-x-full\"\n      -->"
-           [:div.relative.flex-1.flex.flex-col.max-w-xs.w-full
-            {:class (str "bg-" color "-800")}
-            [:div.absolute.top-0.right-0.-mr-14.p-1
-             [:button.flex.items-center.justify-center.h-12.w-12.rounded-full.focus:outline-none.focus:bg-gray-600
-              {:aria-label "Close menu"
-               :on-click #(swap! state assoc :small-screen-menu-hidden true)}
-              [-svg/close-sidebar "h-6 w-6 text-white"]]]
-            [:div.flex-1.h-0.pt-5.pb-4.overflow-y-auto
-             [menu-heading]
-             [:nav.mt-5.px-2.space-y-1
+          user-profile {:person/firstname "Pieter"
+                        :person/lastname "Breed"
+                        :person/email "andrea.nyirenda@gmail.com"}]
 
-              ;; build mobile menu
-               (for [menu-item (->> menu-items
-                                    (map #(assoc % :icon (-svg/icon-for (:key %)
-                                                                        (str "mr-4 h-6 w-6 transition ease-in-out duration-150 "
-                                                                             " text-" color "-400"
-                                                                             " group-hover:text-" color "-300"
-                                                                             " group-focus:text-" color "-300"))))
-                                    (map #(assoc % :on-click (fn []
-                                                               ((:on-click %))
-                                                               (swap! state assoc :small-screen-menu-hidden true)))))]
-                 ^{:key (str "mobile-menu-item-" (:key menu-item))}
-                [mobile-menu-item menu-item])]]
+      (log/debug ::system system)
+      (fn []
+        (let [selected-key (-> @state :selected-menu-key)
+              set-selected-key #(do
+                                  (log/debug ::setting-a-selected-key (pr-str %))
+                                  (swap! state assoc :selected-menu-key %))
+              menu-items (make-menu-items (-> @state :selected-menu-key)
+                                          set-selected-key)
+              selected-menu-item (->> menu-items
+                                      (filter #(= selected-key (:key %)))
+                                      first)]
+          (log/debug ::selected-key selected-key)
+          [:div.h-screen.flex.overflow-hidden.bg-gray-100
+           (comment "<!-- Off-canvas menu for mobile -->")
+           [:div.md:hidden
+            {:class (str (when (-> @state (:small-screen-menu-hidden false)) "hidden"))}
+            [:div.fixed.inset-0.flex.z-40
+             (comment "<!--\n        Off-canvas menu overlay, show/hide based on off-canvas menu state.\n\n        Entering: \"transition-opacity ease-linear duration-300\"\n          From: \"opacity-0\"\n          To: \"opacity-100\"\n        Leaving: \"transition-opacity ease-linear duration-300\"\n          From: \"opacity-100\"\n          To: \"opacity-0\"\n      -->")
+             [:div.fixed.inset-0
+              [:div.absolute.inset-0.bg-gray-600.opacity-75]]
+             ;;"<!--\n        Off-canvas menu, show/hide based on off-canvas menu state.\n\n        Entering: \"transition ease-in-out duration-300 transform\"\n          From: \"-translate-x-full\"\n          To: \"translate-x-0\"\n        Leaving: \"transition ease-in-out duration-300 transform\"\n          From: \"translate-x-0\"\n          To: \"-translate-x-full\"\n      -->"
+             [:div.relative.flex-1.flex.flex-col.max-w-xs.w-full
+              {:class (str "bg-" color "-800")}
+              [:div.absolute.top-0.right-0.-mr-14.p-1
+               [:button.flex.items-center.justify-center.h-12.w-12.rounded-full.focus:outline-none.focus:bg-gray-600
+                {:aria-label "Close menu"
+                 :on-click #(swap! state assoc :small-screen-menu-hidden true)}
+                [-svg/close-sidebar "h-6 w-6 text-white"]]]
+              [:div.flex-1.h-0.pt-5.pb-4.overflow-y-auto
+               [menu-heading]
+               [:nav.mt-5.px-2.space-y-1
 
-            [:div.flex-shrink-0.flex.border-t.p-4
-             {:class (str "border-" color "-700")}
-             [mobile-menu-view-profile user-profile]]]
-           [:div.flex-shrink-0.w-14]]]
-         ;;"<!-- Static sidebar for desktop -->"
-         [:div.hidden.md:flex.md:flex-shrink-0
-          [:div.flex.flex-col.w-64
-           ;;"<!-- Sidebar component, swap this element with another sidebar if you like -->"
-           [:div.flex.flex-col.h-0.flex-1
-            {:class (str "bg-" color "-800")}
-            [:div.flex-1.flex.flex-col.pt-5.pb-4.overflow-y-auto
-             [wide-menu-heading]
-             [:nav.mt-5.flex-1.px-2.space-y-1
-              {:class (str "bg-" color "-800.")}
+                ;; build mobile menu
+                (for [menu-item (->> menu-items
+                                     (map #(assoc % :icon (-svg/icon-for (:key %)
+                                                                         (str "mr-4 h-6 w-6 transition ease-in-out duration-150 "
+                                                                              " text-" color "-400"
+                                                                              " group-hover:text-" color "-300"
+                                                                              " group-focus:text-" color "-300"))))
+                                     (map #(assoc % :on-click (fn []
+                                                                ((:on-click %))
+                                                                (swap! state assoc :small-screen-menu-hidden true)))))]
+                  ^{:key (str "mobile-menu-item-" (:key menu-item))}
+                  [mobile-menu-item menu-item])]]
 
-              ;; build wide menu
-              (for [menu-item (->> menu-items
-                                   (map #(assoc % :icon (-svg/icon-for (:key %) "mr-3 h-6 w-6 transition ease-in-out duration-150 "
-                                                                       " text-" color "-400"
-                                                                       " group-hover:text-" color "-300"
-                                                                       " group-focus:text-" color "-300"
-                                                                       ))))]
-                ^{:key (str "wide-menu-item-" (:key menu-item))}
-                [wide-menu-item menu-item])
+              [:div.flex-shrink-0.flex.border-t.p-4
+               {:class (str "border-" color "-700")}
+               [mobile-menu-view-profile user-profile]]]
+             [:div.flex-shrink-0.w-14]]]
+           ;;"<!-- Static sidebar for desktop -->"
+           [:div.hidden.md:flex.md:flex-shrink-0
+            [:div.flex.flex-col.w-64
+             ;;"<!-- Sidebar component, swap this element with another sidebar if you like -->"
+             [:div.flex.flex-col.h-0.flex-1
+              {:class (str "bg-" color "-800")}
+              [:div.flex-1.flex.flex-col.pt-5.pb-4.overflow-y-auto
+               [wide-menu-heading]
+               [:nav.mt-5.flex-1.px-2.space-y-1
+                {:class (str "bg-" color "-800.")}
+
+                ;; build wide menu
+                (for [menu-item (->> menu-items
+                                     (map #(assoc % :icon (-svg/icon-for (:key %) "mr-3 h-6 w-6 transition ease-in-out duration-150 "
+                                                                         " text-" color "-400"
+                                                                         " group-hover:text-" color "-300"
+                                                                         " group-focus:text-" color "-300"
+                                                                         ))))]
+                  ^{:key (str "wide-menu-item-" (:key menu-item))}
+                  [wide-menu-item menu-item])
 
 
-              ]]
-            [:div.flex-shrink-0.flex.border-t.p-4
-             {:class (str "border-" color "-700")}
-             [wide-view-profile user-profile]]]]]
-         [:div.flex.flex-col.w-0.flex-1.overflow-hidden
-          [:div.md:hidden.pl-1.pt-1.sm:pl-3.sm:pt-3
-           [:button.-ml-0.5.-mt-0.5.h-12.w-12.inline-flex.items-center.justify-center.rounded-md.text-gray-500.hover:text-gray-900.focus:outline-none.focus:bg-gray-200.transition.ease-in-out.duration-150
-            {:aria-label "Open menu"
-             :on-click #(swap! state assoc :small-screen-menu-hidden false)}
-            [-svg/open-sidebar "h-6 w-6"]]]
+                ]]
+              [:div.flex-shrink-0.flex.border-t.p-4
+               {:class (str "border-" color "-700")}
+               [wide-view-profile user-profile]]]]]
+           [:div.flex.flex-col.w-0.flex-1.overflow-hidden
+            [:div.md:hidden.pl-1.pt-1.sm:pl-3.sm:pt-3
+             [:button.-ml-0.5.-mt-0.5.h-12.w-12.inline-flex.items-center.justify-center.rounded-md.text-gray-500.hover:text-gray-900.focus:outline-none.focus:bg-gray-200.transition.ease-in-out.duration-150
+              {:aria-label "Open menu"
+               :on-click #(swap! state assoc :small-screen-menu-hidden false)}
+              [-svg/open-sidebar "h-6 w-6"]]]
 
-          [:main.flex-1.relative.z-0.overflow-y-auto.focus:outline-none
-           {:tabIndex "0"}
-           (when (or selected-menu-item)
-             [:div.pt-2.pb-6.md:py-6
-              [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
-               [:h1.text-2xl.font-semibold.text-gray-900 (:text selected-menu-item)]]
-              [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
-               [:div.py-4
-                (log/debug ::system system)
-                (-ui-common/render-workspace selected-key main-system)]]])]
+            [:main.flex-1.relative.z-0.overflow-y-auto.focus:outline-none
+             {:tabIndex "0"}
+             (when (or selected-menu-item)
+               [:div.pt-2.pb-6.md:py-6
+                [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
+                 [:h1.text-2xl.font-semibold.text-gray-900 (:text selected-menu-item)]]
+                [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
+                 [:div.py-4
+                  (log/debug ::system system)
+                  (-ui-common/render-workspace selected-key main-system)]]])]
 
-          [-sidebar/sidebar system]]]))))
+            [-sidebar/sidebar system]]])))
+    (catch :default e
+      (log/error ::error-handler (pr-str e)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

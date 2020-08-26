@@ -48,7 +48,10 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn main-widget [widget]
-  (render widget (js/document.getElementById "app")))
+  (try
+    (render widget (js/document.getElementById "app"))
+    (catch :default e
+      (log/error ::main-widget e))))
 
 (defn ^:export run []
   (start)
