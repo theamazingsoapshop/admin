@@ -92,20 +92,32 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-menu-items
-  [selected-key set-select-key-fn]
+  [breadcrumbs selected-key set-select-key-fn]
   (log/debug ::making-menu-items selected-key)
-  (log/spy (->> [{:key ::-payments/payments}
-                 {:key ::team}
-                 {:key ::logout
-                  :text "Instant logout"}]
-                (map #(assoc % :selected? (= selected-key (:key %))))
-                (map #(assoc % :text (menu-text %)))
-                (map #(assoc % :on-click (fn [& _] (set-select-key-fn %)))))))
+  (->> [{:key ::-payments/payments
+         :actions
+         [{::-buttons/text     "Issue new invoice"
+           ::-buttons/serious? true
+           ::-buttons/on-click
+           #(-breadcrumbs/push-item!
+             breadcrumbs
+             (reify
+               -ui-common/IWorkspaceItem
+               (workspace-item-title [_] "New invoice")
+               (workspace-item-ui [_]
+                 [:div [:p "Hello new invoice"]])
+               (workspace-item-actions [_] nil)))}]}
+        {:key ::team}
+        {:key ::logout
+         :text "Instant logout"}]
+       (map #(assoc % :selected? (= selected-key (:key %))))
+       (map #(assoc % :text (menu-text %)))
+       (map #(assoc % :on-click (fn [& _] (set-select-key-fn %))))))
 
 (defn ui [{system      ::app
            breadcrumbs ::-breadcrumbs/breadcrumbs
            :as         main-system}]
-  (try 
+  (try
     (let [state (::state system)
 
           user-profile {:person/firstname "Pieter"
@@ -117,7 +129,7 @@
         (let [selected-key (-> @state :selected-menu-key)
 
               set-selected-key
-              (fn [{:keys [key text]
+              (fn [{:keys [key text actions]
                     :as selected-item}]
                 (log/debug ::setting-a-selected-key (pr-str selected-item))
                 (-breadcrumbs/reset-items! breadcrumbs)
@@ -127,11 +139,12 @@
                                            (workspace-item-title [_] text)
                                            (workspace-item-ui [_]
                                              [-ui-common/render-workspace key system])
-                                           (workspace-item-actions [_] nil)))
+                                           (workspace-item-actions [_] actions)))
                 (swap! state assoc :selected-menu-key key))
 
               menu-items
-              (make-menu-items (-> @state :selected-menu-key)
+              (make-menu-items breadcrumbs
+                               (-> @state :selected-menu-key)
                                set-selected-key)
 
               selected-menu-item (->> menu-items

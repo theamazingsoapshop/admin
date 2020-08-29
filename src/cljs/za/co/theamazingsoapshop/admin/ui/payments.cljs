@@ -5,6 +5,7 @@
             [za.co.theamazingsoapshop.admin.ui.tables :as -tables]
             [za.co.theamazingsoapshop.admin.ui.headings :as -headings]
             [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
+            [za.co.theamazingsoapshop.admin.ui.buttons :as -buttons]
             [reagent.core :as r]
             [clojure.string :as str]
             [integrant.core :as ig]
@@ -286,8 +287,6 @@
    [:div.my-4
     [section-header "Completed Payments"]
     [section-content [payments]]]])
-
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

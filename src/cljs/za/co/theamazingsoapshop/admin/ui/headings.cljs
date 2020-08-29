@@ -13,8 +13,9 @@
 
 (s/def ::text (s/and string?
                      #(< 0 (count %))))
-
-(s/def ::breadcrumb (s/coll-of (s/keys :req [::text])
+(s/def ::on-click fn?)
+(s/def ::breadcrumb (s/coll-of (s/keys :req [::text]
+                                       :opt [::on-click])
                                into []
                                :min-count 1
                                :max-count 7))
@@ -56,10 +57,11 @@
         [:pre.border.border-1.m-1 (s/explain-str ::heading-spec ts)])
       (let [{::keys [breadcrumb menu title]} table-spec
 
-            breadcrumb-render-fn (fn [{crumb ::text}]
+            breadcrumb-render-fn (fn [{::keys [text on-click]}]
                                    [:a.text-gray-500.hover:text-gray-700.transition.duration-150.ease-in-out
-                                    {:href "#"}
-                                    crumb])]
+                                    (cond-> {:href "#"}
+                                      on-click (assoc :on-click on-click))
+                                    text])]
         [:div
          [:div
           [:nav.sm:hidden
@@ -81,8 +83,7 @@
                                        :d
                                        "M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z",
                                        :fill-rule "evenodd"}]]
-                                    (->> breadcrumb
-                                         (map breadcrumb-render-fn)))]
+                                    (map breadcrumb-render-fn breadcrumb))]
              ui-item)]]
          [:div.mt-2.md:flex.md:items-center.md:justify-between
           [:div.flex-1.min-w-0

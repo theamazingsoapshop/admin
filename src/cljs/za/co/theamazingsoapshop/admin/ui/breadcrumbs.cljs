@@ -11,8 +11,6 @@
     "Pushes a new item to the workspace, growing the breadcrumb stack.")
   (reset-items! [bc]
     "Removes all of the items from the crumbs list.")
-  (breadcrumbs-ui [bc]
-    "The actual crumbs on the screen.")
   (workspace-ui-item [bc]
     "The user-interface supplied by the items in the crumbs"))
 
@@ -28,22 +26,33 @@
 (defn workspace-ui
   [cfg ratom-state]
   (fn []
-    (when-let [top (first @ratom-state)]
-      [:div.pt-2.pb-6.md:py-6
-       [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
-        (let [non-top-crumbs (->> @ratom-state
-                                  rest
-                                  (map #(hash-map ::-headings/text
-                                                  (-ui-common/workspace-item-title %))))]
-          (-headings/heading-with-breadcrumb-and-buttons
-           (cond-> {}
-             true (assoc ::-headings/title (-ui-common/workspace-item-title top))
+    (log/debug ::ratom-state @ratom-state)
+    (let [[top & rst] @ratom-state]
+      (when top
+        [:div.pt-2.pb-6.md:py-6
+         [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
+          (let [non-top-crumbs (->> rst
+                                    (map #(hash-map ::-headings/text
+                                                    (-ui-common/workspace-item-title %)))
+                                    (map-indexed #(assoc %2
+                                                         ::-headings/on-click
+                                                         (fn []
+                                                           (swap! ratom-state nthrest (inc %1))))))
 
-             (pos? (count non-top-crumbs))
-             (assoc ::-headings/breadcrumb non-top-crumbs))))]
-       [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
-        [:div.py-4
-         (-ui-common/workspace-item-ui top)]]])))
+                actions (-ui-common/workspace-item-actions top)]
+            (-headings/heading-with-breadcrumb-and-buttons
+             (cond-> {}
+               true
+               (assoc ::-headings/title (-ui-common/workspace-item-title top))
+
+               (pos? (count actions))
+               (assoc ::-headings/menu actions)
+
+               (pos? (count non-top-crumbs))
+               (assoc ::-headings/breadcrumb non-top-crumbs))))]
+         [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
+          [:div.py-4
+           (-ui-common/workspace-item-ui top)]]]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -58,10 +67,9 @@
       IBreadcrumb
       (push-item! [_ x]
         (if (satisfies? -ui-common/IWorkspaceItem x)
-          (swap! state #(cons x %))
+          (swap! state conj x)
           (do
             (log/error ::does-not-satisfy-IWorkspaceItem x))))
       (reset-items! [_] (reset! state default-state))
-      (breadcrumbs-ui [_] (breadcrumb-ui cfg state))
       (workspace-ui-item [_] (workspace-ui cfg state)))))
 

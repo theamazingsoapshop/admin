@@ -23,10 +23,12 @@
                      #(< 0 (count %))))
 (s/def ::serious? #{true})
 (s/def ::extra-classes ::text)
+(s/def ::on-click fn?)
 
 (s/def ::button-spec (s/keys :req [::text]
                              :opt [::serious?
-                                   ::extra-classes]))
+                                   ::extra-classes
+                                   ::on-click]))
 
 ;;;;;;;;;;;;;;;;;;;;
 
@@ -37,12 +39,12 @@
       (do
         (log/warn ::invalid-spec-to-button (s/explain-data ::button-spec bs))
         [:pre.border.border-1.m-1 (s/explain-str ::button-spec bs)])
-      (let [{::keys [text serious? extra-classes]} button-spec]
+      (let [{::keys [text serious? extra-classes on-click]} button-spec]
         [:span.shadow-sm.rounded-md
-         [:button
-          {:class (str (if serious? serious-button-classes
-                           not-so-serious-button-classes)
-                       " "
-                       extra-classes)
-           :type "button"}
+         [:button (cond-> {:class (str (if serious? serious-button-classes
+                                               not-so-serious-button-classes)
+                                           " "
+                                           extra-classes)
+                           :type  "button"}
+                    on-click (assoc :on-click on-click))
           text]]))))
