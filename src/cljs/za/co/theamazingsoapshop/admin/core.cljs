@@ -14,7 +14,8 @@
             md5.core
             [integrant.core :as ig]
             [za.co.theamazingsoapshop.admin.ui.app :as -app]
-            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]))
+            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
+            [za.co.theamazingsoapshop.admin.ui.breadcrumbs :as -breadcrumbs]))
 
 (glogi-console/install!)
 
@@ -27,11 +28,14 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn make-default-config []
-  {::-app/app         {::-sidebar/sidebar (ig/ref ::-sidebar/sidebar)}
-   ::-sidebar/sidebar {}
+  {::-app/app                 {::-sidebar/sidebar         (ig/ref ::-sidebar/sidebar)
+                               ::-breadcrumbs/breadcrumbs (ig/ref ::-breadcrumbs/breadcrumbs)}
+   ::-sidebar/sidebar         {}
+   ::-breadcrumbs/breadcrumbs {}
 
    :za.co.theamazingsoapshop.admin.ui.payments/payments
-   {::-sidebar/sidebar (ig/ref ::-sidebar/sidebar)}})
+   {::-sidebar/sidebar         (ig/ref ::-sidebar/sidebar)
+    ::-breadcrumbs/breadcrumbs (ig/ref ::-breadcrumbs/breadcrumbs)}})
 
 (defonce system (r/atom nil))
 

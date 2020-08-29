@@ -3,11 +3,14 @@
             [za.co.theamazingsoapshop.admin.ui.common :as -ui-common]
             [za.co.theamazingsoapshop.admin.ui.payments :as -payments]
             [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
+            [za.co.theamazingsoapshop.admin.ui.headings :as -headings]
+            [za.co.theamazingsoapshop.admin.ui.breadcrumbs :as -breadcrumbs]
             [reagent.core :as r]
             [clojure.string :as str]
             [integrant.core :as ig]
             [lambdaisland.glogi :as log]
-            [cljs-gravatar.core :as gravatar]))
+            [cljs-gravatar.core :as gravatar]
+            [za.co.theamazingsoapshop.admin.ui.buttons :as -buttons]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -96,13 +99,12 @@
                  {:key ::logout
                   :text "Instant logout"}]
                 (map #(assoc % :selected? (= selected-key (:key %))))
-                (map #(assoc % :on-click (fn [_]
-                                           (log/debug ::hierso (:key %))
-                                           (set-select-key-fn (:key %)))))
-                (map #(assoc % :text (menu-text %))))))
+                (map #(assoc % :text (menu-text %)))
+                (map #(assoc % :on-click (fn [& _] (set-select-key-fn %)))))))
 
-(defn ui [{system ::app
-           :as main-system}]
+(defn ui [{system      ::app
+           breadcrumbs ::-breadcrumbs/breadcrumbs
+           :as         main-system}]
   (try 
     (let [state (::state system)
 
@@ -113,11 +115,25 @@
       (log/debug ::system system)
       (fn []
         (let [selected-key (-> @state :selected-menu-key)
-              set-selected-key #(do
-                                  (log/debug ::setting-a-selected-key (pr-str %))
-                                  (swap! state assoc :selected-menu-key %))
-              menu-items (make-menu-items (-> @state :selected-menu-key)
-                                          set-selected-key)
+
+              set-selected-key
+              (fn [{:keys [key text]
+                    :as selected-item}]
+                (log/debug ::setting-a-selected-key (pr-str selected-item))
+                (-breadcrumbs/reset-items! breadcrumbs)
+                (-breadcrumbs/push-item! breadcrumbs
+                                         (reify
+                                           -ui-common/IWorkspaceItem
+                                           (workspace-item-title [_] text)
+                                           (workspace-item-ui [_]
+                                             [-ui-common/render-workspace key system])
+                                           (workspace-item-actions [_] nil)))
+                (swap! state assoc :selected-menu-key key))
+
+              menu-items
+              (make-menu-items (-> @state :selected-menu-key)
+                               set-selected-key)
+
               selected-menu-item (->> menu-items
                                       (filter #(= selected-key (:key %)))
                                       first)]
@@ -195,13 +211,7 @@
             [:main.flex-1.relative.z-0.overflow-y-auto.focus:outline-none
              {:tabIndex "0"}
              (when (or selected-menu-item)
-               [:div.pt-2.pb-6.md:py-6
-                [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
-                 [:h1.text-2xl.font-semibold.text-gray-900 (:text selected-menu-item)]]
-                [:div.max-w-7xl.mx-auto.px-4.sm:px-6.md:px-8
-                 [:div.py-4
-                  (log/debug ::system system)
-                  (-ui-common/render-workspace selected-key main-system)]]])]
+               [-breadcrumbs/workspace-ui-item breadcrumbs])]
 
             [-sidebar/sidebar system]]])))
     (catch :default e

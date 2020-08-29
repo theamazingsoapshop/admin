@@ -21,3 +21,9 @@
   (sidebar-title [this] "Provides the title text for the sidebar component")
   (sidebar-component [this] "Provides the main UI for the sidebar component"))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defprotocol IWorkspaceItem
+  (workspace-item-title [this] "Provides the title text for the workspace item, main UI")
+  (workspace-item-actions [this] "The buttons on the heading.")
+  (workspace-item-ui [this] "The main ui of the item"))

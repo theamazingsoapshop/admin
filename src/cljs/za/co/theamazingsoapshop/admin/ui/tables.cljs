@@ -113,6 +113,6 @@
 
                 ^{:key (str table-id "-row-" (row-id-fn row) "-coll-" i)}
                 [:td.px-6.py-4.whitespace-no-wrap.text-sm.leading-5.text-gray-500
-                 {:class (str cell-classes)}
+                 {:class (str (when cell-classes cell-classes))}
                  (cell-fn row)])])]]]))))
 

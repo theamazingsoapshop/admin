@@ -1,8 +1,9 @@
 (ns za.co.theamazingsoapshop.admin.ui.payments
   (:require [za.co.theamazingsoapshop.admin.ui.svg :as -svg]
             [za.co.theamazingsoapshop.admin.ui.common :as -ui-common]
-            [za.co.theamazingsoapshop.admin.ui.sidebar :as -siderbar]
+            [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
             [za.co.theamazingsoapshop.admin.ui.tables :as -tables]
+            [za.co.theamazingsoapshop.admin.ui.headings :as -headings]
             [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
             [reagent.core :as r]
             [clojure.string :as str]
@@ -102,53 +103,8 @@
   (sidebar-title [this] (invoice-item-sidebar-title item))
   (sidebar-component [this] (invoice-item-ui item)))
 
-(comment
-
-  (def ii (InvoiceItem. {:a a}))
-
-  (-tables/make-table {::-tables/table-id "payments-invoices"
-                       ::-tables/columns columns
-                       ::-tables/row-data (-tables/maps->rows
-                                           {::-tables/id-fn #(str "invoice-" (:person/firstame %) "-" (:person/lastname %))
-                                            ::-tables/col-fns (sorted-map ::name #(str (:person/firstname %) " " (:person/lastname %))
-                                                                          ::email #(str (:person/email %))
-                                                                          ::amount (fn [x]
-                                                                                     [:span
-                                                                                      [:span (:invoice/currency-symbol x)] " "
-                                                                                      [:span.font-bold (:invoice/amount x)] " "
-                                                                                      [:span (:invoice/currency-code x)]])
-                                                                          ::date #(str (:invoice/date %))
-                                                                          ::action (fn [x] [open-item-btn {:text "Open"
-                                                                                                           :on-click #(view-invoice-fn x)}]))}
-                                           [{:person/firstname        "Pieter"
-                                             :person/lastname         "Breed"
-                                             :person/email            "pieter@pb.co.za"
-                                             :invoice/amount          "1234"
-                                             :invoice/currency-code   "ZAR"
-                                             :invoice/currency-symbol "R"
-                                             :invoice/date            "20 November 1980"}
-                                            {:person/firstname        "Andrew"
-                                             :person/lastname         "Jones"
-                                             :person/email            "andrew@jones.co.za"
-                                             :invoice/amount          "7655"
-                                             :invoice/currency-code   "ZAR"
-                                             :invoice/currency-symbol "R"
-                                             :invoice/date            "4 July 1999"}
-                                            {:person/firstname        "Priscilla"
-                                             :person/lastname         "of the Desert, Queen"
-                                             :person/email            "cillar@queen.com"
-                                             :invoice/amount          "675"
-                                             :invoice/currency-code   "ZAR"
-                                             :invoice/currency-symbol "R"
-                                             :invoice/date            "20 April 1981"}])})
-
-
-
-  )
-
-
 (defn invoices [{:as system
-                 :keys [::-siderbar/sidebar]}]
+                 :keys [::-sidebar/sidebar]}]
   (log/debug ::system system)
   (try
     (let [view-invoice-fn (fn [invoice-item]
@@ -205,7 +161,8 @@
                                                      ::-tables/column-header "name"}
                                                     {::-tables/cell-fn        (comp str :person/email)
                                                      ::-tables/column-header  "email"
-                                                     ::-tables/header-classes "hidden lg:table-cell"}
+                                                     ::-tables/header-classes "hidden lg:table-cell"
+                                                     ::-tables/cell-classes   "hidden lg:table-cell"}
                                                     {::-tables/cell-fn        (fn [x]
                                                                                 [:span
                                                                                  [:span (:invoice/currency-symbol x)] " "
@@ -283,17 +240,22 @@
         [-tables/make-table {::-tables/table-id  "payments"
                                ::-tables/columns   [{::-tables/cell-fn       #(str (:person/firstname %) " " (:person/lastname %))
                                                      ::-tables/column-header "name"}
+
                                                     {::-tables/cell-fn        (comp str :person/email)
                                                      ::-tables/column-header  "email"
-                                                     ::-tables/header-classes "hidden lg:table-cell"}
+                                                     ::-tables/header-classes "hidden lg:table-cell"
+                                                     ::-tables/cell-classes   "hidden lg:table-cell"}
+
                                                     {::-tables/cell-fn        (fn [x]
                                                                                 [:span
                                                                                  [:span (:payment/currency-symbol x)] " "
                                                                                  [:span.font-bold (:payment/amount x)] " "
                                                                                  [:span (:payment/currency-code x)]])
                                                      ::-tables/column-header "amount"}
+
                                                     {::-tables/cell-fn       (comp str :payment/date)
                                                      ::-tables/column-header "date"}
+
                                                     {::-tables/cell-fn       (fn [x] [open-item-btn {:text     "Open"
                                                                                                      :on-click identity}])
                                                      ::-tables/column-header "action"}]
