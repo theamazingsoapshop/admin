@@ -6,6 +6,7 @@
             [za.co.theamazingsoapshop.admin.ui.headings :as -headings]
             [za.co.theamazingsoapshop.admin.ui.sidebar :as -sidebar]
             [za.co.theamazingsoapshop.admin.ui.buttons :as -buttons]
+            [za.co.theamazingsoapshop.admin.ui.new-payment :as -new-payment]
             [reagent.core :as r]
             [clojure.string :as str]
             [integrant.core :as ig]

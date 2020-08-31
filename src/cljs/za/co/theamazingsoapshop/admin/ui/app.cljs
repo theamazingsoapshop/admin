@@ -10,7 +10,8 @@
             [integrant.core :as ig]
             [lambdaisland.glogi :as log]
             [cljs-gravatar.core :as gravatar]
-            [za.co.theamazingsoapshop.admin.ui.buttons :as -buttons]))
+            [za.co.theamazingsoapshop.admin.ui.buttons :as -buttons]
+            [za.co.theamazingsoapshop.admin.ui.new-payment :as -new-payment]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -101,12 +102,7 @@
            ::-buttons/on-click
            #(-breadcrumbs/push-item!
              breadcrumbs
-             (reify
-               -ui-common/IWorkspaceItem
-               (workspace-item-title [_] "New invoice")
-               (workspace-item-ui [_]
-                 [:div [:p "Hello new invoice"]])
-               (workspace-item-actions [_] nil)))}]}
+             (-new-payment/new-payment {}))}]}
         {:key ::team}
         {:key ::logout
          :text "Instant logout"}]
